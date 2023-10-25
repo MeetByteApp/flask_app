@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="my-3">{% block title %} Products {% endblock %}</h1>
+<div class="row gx-5">
+    {% for product in products %}
+    <div class="col-6 bg-light p-2">
+        <a href="{{ url_for('product', id=product['id']) }}">
+            <h2>{{ product['name'] }}</h2>
+        </a>
+        <span class="badge badge-primary">{{ product['created'] }}</span>
+        <hr>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
