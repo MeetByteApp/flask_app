@@ -33,13 +33,13 @@
                                         {% for i in range(cartLen) %}
                                         <tr>
                                             <th scope="row">{{ i + 1 }}</th>
-                                            <td><img src="/static/images/s22.webp" width="30px"
-                                                    alt="{{ shoppingCart[i]["name"] }}" /></td>
+                                            <td><img src="/static/images/{{shoppingCart[i]['image']}}.webp" width="30px"
+                                                    alt="{{shoppingCart[i]['name']}}" /></td>
                                             <td>
                                                 <form action="/update/">
-                                                    <input type="hidden" name="id" value="{{shoppingCart[i]["id"]}}" />
+                                                    <input type="hidden" name="id" value="{{shoppingCart[i]['id']}}" />
                                                     <input type="number" name="quantity" min="1" max="10" size="5"
-                                                        value="{{ shoppingCart[i]['SUM(quantity)'] }}">
+                                                        value="{{shoppingCart[i]['SUM(quantity)'] }}">
                                                     <button type="submit"
                                                         class="btn btn-warning checkout">Update</button>
                                                 </form>
@@ -48,7 +48,7 @@
                                             <td>{{ '${:,.2f}'.format(shoppingCart[i]['SUM(subTotal)']) }}</td>
                                             <td>
                                                 <form action="/remove/" methods="GET">
-                                                    <input type="hidden" name="id" value="{{ shoppingCart[i]["id"]}}" />
+                                                    <input type="hidden" name="id" value="{{shoppingCart[i]['id']}}" />
                                                     <button type="submit" class="btn btn-secondary btn-sm"
                                                         id="removeFromCart">Remove</button>
                                                 </form>

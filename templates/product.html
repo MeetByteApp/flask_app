@@ -2,35 +2,20 @@
 
 {% block content %}
 <div>
-    <!-- <label for="name">Name</label>
-    <br>
-    <input type="text" name="name" placeholder="Product Name"
-        value="{{ request.form['name'] or product['name'] }}"></input>
-    <br>
-
-    <label for="description">Product Description</label>
-    <br>
-    <textarea name="description" placeholder="Product description" rows="15"
-        cols="60">{{ request.form['dexcription'] or product['description'] }}</textarea>
-    <br>
-    <button type="submit">Submit</button> -->
     <form action="/buy/" methods="POST">
-        <h5 class="card-title">{{product["name"].capitalize()}}</h5>
-        <img src="/static/images/s22.webp" class="shirt" alt="" />
-        <h5 class="card-text">{{product["name"]}}</h5>
-        {% if product["onSale"] %}
-        <img src="/static/img/sale-icon.png" width="26px" />
-        <h4 class="card-text price" style="color:red; display:inline">{{ '{:,.2f}'.format(product["price"]) }}
-        </h4>
-        {% else %}
+        <div class="row align-items-center">
+            <span class="display-4 my-3">{{product["name"].capitalize()}}</span>
+        </div>
+        <img src="/static/images/{{product['image']}}.webp" class="my-3 rounded" alt="" />
+        <h5 class="card-text">{{product['name']}}</h5>
+        <h5 class="card-text">{{product['description']}}</h5>
         <h4 class="card-text price">{{ '{:,.2f}'.format(product["price"]) }}</h4>
-        {% endif %}
         <div class="stepper-input">
             <span class="decrement target">-</span>
-            <input class="quantity" name="quantity" value='0' />
+            <input class="quantity" name="quantity" value='1' />
             <span class="increment target">+</span>
         </div>
-        <input type="hidden" name="id" value="{{product["id"]}}" />
+        <input type="hidden" name="id" value="{{product['id']}}" />
         <input type="submit" class="btn btn-primary addToCart" value="Add To Cart" /><br /><br />
         <div class="alert alert-danger flashMessage" style="text-align: center; display:none; font-size:0.9em;"></div>
     </form>
