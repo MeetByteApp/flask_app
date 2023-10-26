@@ -7,7 +7,7 @@
     <div>
         <div>
             <div>
-                <h5 class="modal-title" id="exampleModalLongTitle">Shopping Cart</h5>
+                <h5 class="modal-title my-3" id="exampleModalLongTitle">Shopping Cart</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 </button>
             </div>
@@ -28,7 +28,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- For Each shirt -->
+                                        <!-- For Each product -->
                                         {% if cartLen != 0 %}
                                         {% for i in range(cartLen) %}
                                         <tr>
@@ -48,8 +48,7 @@
                                             <td>{{ '${:,.2f}'.format(shoppingCart[i]['SUM(subTotal)']) }}</td>
                                             <td>
                                                 <form action="/remove/" methods="GET">
-                                                    <input type="hidden" name="id" value="{{ shoppingCart[i][" id"]
-                                                        }}" />
+                                                    <input type="hidden" name="id" value="{{ shoppingCart[i]["id"]}}" />
                                                     <button type="submit" class="btn btn-secondary btn-sm"
                                                         id="removeFromCart">Remove</button>
                                                 </form>
@@ -80,7 +79,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colSpan="7">Get some shirts now!<br />
+                                            <td colSpan="7">Get some products now!<br />
                                                 <div>
                                                     <a href="/"><button type="button" class="btn btn-secondary"
                                                             data-dismiss="modal">Continue Shopping</button></a>

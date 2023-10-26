@@ -1,4 +1,5 @@
 import sqlite3
+import uuid
 from flask import Flask, render_template, request, url_for, flash, redirect, abort, session
 
 
@@ -41,12 +42,40 @@ def add_to_cart(product_id, quantity):
     conn.close()
 
 
+def delete_from_cart(product_id):
+    conn = get_db_connection()
+    conn.cursor().execute("DELETE FROM cart WHERE id = ?", (product_id,))
+    conn.commit()
+    conn.cursor().close()
+    conn.close()
+
+
 def get_cart():
     conn = get_db_connection()
     cart = conn.execute(
         "SELECT id, name, image, SUM(quantity), price, SUM(subTotal) FROM cart GROUP BY name").fetchall()
     conn.close()
     return cart
+
+
+def clear_cart():
+    conn = get_db_connection()
+    conn.cursor().execute("DELETE FROM cart")
+    conn.commit()
+    conn.cursor().close()
+    conn.close()
+
+
+def create_order():
+    conn = get_db_connection()
+    cart = conn.execute("SELECT * FROM cart").fetchall()
+    if (len(cart) > 0):
+        order_id = str(uuid.uuid4())
+        conn.cursor().execute("INSERT INTO orders (order_id, status, totalItems) VALUES( ?, ?, ?)",
+                              (order_id, "Confirmed", len(cart)))
+        for item in cart:
+            conn.execute("INSERT INTO order_details (order_id, product_id, quantity, price) VALUES( ?, ?, ?, ?)",
+                         (order_id, item["id"], item["quantity"], item["price"]))
 
 
 app = Flask(__name__)
@@ -106,49 +135,31 @@ def buy():
 def update():
     # Initialize shopping cart variables
     shoppingCart = []
-    shopLen = len(shoppingCart)
+    cartLen = len(shoppingCart)
     totItems, total, display = 0, 0, 0
     qty = int(request.args.get('quantity'))
     # Store id of the selected shirt
     id = int(request.args.get('id'))
-    db.execute("DELETE FROM cart WHERE id = :id", id=id)
-    # Select info of selected shirt from database
-    goods = db.execute("SELECT * FROM shirts WHERE id = :id", id=id)
-    # Extract values from selected shirt record
-    # Check if shirt is on sale to determine price
-    if (goods[0]["onSale"] == 1):
-        price = goods[0]["onSalePrice"]
-    else:
-        price = goods[0]["price"]
-    samplename = goods[0]["samplename"]
-    image = goods[0]["image"]
-    subTotal = qty * price
-    # Insert selected shirt into shopping cart
-    db.execute("INSERT INTO cart (id, qty, samplename, image, price, subTotal) VALUES (:id, :qty, :samplename, :image, :price, :subTotal)",
-               id=id, qty=qty, samplename=samplename, image=image, price=price, subTotal=subTotal)
-    shoppingCart = db.execute(
-        "SELECT samplename, image, SUM(qty), SUM(subTotal), price, id FROM cart GROUP BY samplename")
-    shopLen = len(shoppingCart)
+    delete_from_cart(id)
+    add_to_cart(id, qty)
+    shoppingCart = get_cart()
+    cartLen = len(shoppingCart)
     # Rebuild shopping cart
-    for i in range(shopLen):
+    for i in range(cartLen):
         total += shoppingCart[i]["SUM(subTotal)"]
-        totItems += shoppingCart[i]["SUM(qty)"]
+        totItems += shoppingCart[i]["SUM(quantity)"]
     # Go back to cart page
-    return render_template("cart.html", shoppingCart=shoppingCart, shopLen=shopLen, total=total, totItems=totItems, display=display, session=session)
+    return render_template("cart.html", shoppingCart=shoppingCart, cartLen=cartLen, total=total, totItems=totItems, display=display)
 
 
 @app.route("/checkout/")
 def checkout():
-    conn = get_db_connection()
-    order = conn.execute("SELECT * from cart")
     # Update purchase history of current customer
-    for item in order:
-        conn.execute("INSERT INTO purchases (uid, id, samplename, image, quantity) VALUES(:uid, :id, :samplename, :image, :quantity)",
-                     uid=session["uid"], id=item["id"], samplename=item["samplename"], image=item["image"], quantity=item["qty"])
+    create_order()
     # Clear shopping cart
-    conn.execute("DELETE from cart")
+    clear_cart()
     shoppingCart = []
-    shopLen = len(shoppingCart)
+    cartLen = len(shoppingCart)
     totItems, total, display = 0, 0, 0
     # Redirect to home page
     return redirect('/')
@@ -160,20 +171,19 @@ def remove():
     # Get the id of shirt selected to be removed
     out = int(request.args.get("id"))
     # Remove shirt from shopping cart
-    conn.execute("DELETE from cart WHERE id=:id", id=out)
+    delete_from_cart(out)
     # Initialize shopping cart variables
     totItems, total, display = 0, 0, 0
     # Rebuild shopping cart
-    shoppingCart = db.execute(
-        "SELECT samplename, image, SUM(qty), SUM(subTotal), price, id FROM cart GROUP BY samplename")
-    shopLen = len(shoppingCart)
-    for i in range(shopLen):
+    shoppingCart = get_cart()
+    cartLen = len(shoppingCart)
+    for i in range(cartLen):
         total += shoppingCart[i]["SUM(subTotal)"]
-        totItems += shoppingCart[i]["SUM(qty)"]
+        totItems += shoppingCart[i]["SUM(quantity)"]
     # Turn on "remove success" flag
     display = 1
     # Render shopping cart
-    return render_template("cart.html", shoppingCart=shoppingCart, shopLen=shopLen, total=total, totItems=totItems, display=display, session=session)
+    return render_template("cart.html", shoppingCart=shoppingCart, cartLen=cartLen, total=total, totItems=totItems, display=display)
 
 
 @app.route("/cart/")
@@ -182,11 +192,24 @@ def cart():
     totItems, total, display = 0, 0, 0
     # Grab info currently in database
     cart = get_cart()
-    print(cart)
     # Get variable values
     cartLen = len(cart)
     for i in range(cartLen):
         total += cart[i]["SUM(subTotal)"]
         totItems += cart[i]["SUM(quantity)"]
     # Render shopping cart
-    return render_template("cart.html", shoppingCart=cart, cartLen=cartLen, total=total, totItems=totItems, display=display, session=session)
+    return render_template("cart.html", shoppingCart=cart, cartLen=cartLen, total=total, totItems=totItems, display=display)
+
+
+@app.route("/history/")
+def history():
+    # Initialize shopping cart variables
+    shoppingCart = []
+    shopLen = len(shoppingCart)
+    totItems, total, display = 0, 0, 0
+    # Retrieve all shirts ever bought by current user
+    myShirts = db.execute(
+        "SELECT * FROM purchases WHERE uid=:uid", uid=session["uid"])
+    myShirtsLen = len(myShirts)
+    # Render table with shopping history of current user
+    return render_template("history.html", shoppingCart=shoppingCart, shopLen=shopLen, total=total, totItems=totItems, display=display, session=session, myShirts=myShirts, myShirtsLen=myShirtsLen)

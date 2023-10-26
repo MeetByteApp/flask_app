@@ -19,3 +19,19 @@ CREATE TABLE cart (
     price NUMBER,
     subTotal NUMBER
 );
+
+CREATE TABLE orders (
+    order_id UUID PRIMARY KEY,
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status TEXT NOT NULL,
+    totalItems NUMBER NOT NULL
+);
+
+CREATE TABLE order_details (
+    order_details_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER,
+    product_id INTEGER,
+    quantity INTEGER,
+    price NUMBER,
+    FOREIGN KEY (order_id) REFERENCES orders (order_id)
+);
