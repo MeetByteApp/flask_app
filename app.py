@@ -9,9 +9,12 @@ def get_db_connection():
     return conn
 
 
-def get_products():
+def get_products(query=None):
     conn = get_db_connection()
     products = conn.execute('SELECT * FROM products').fetchall()
+    if query:
+        products = [product for product in products if query.lower()
+                    in product['name'].lower()]
     conn.close()
     return products
 
@@ -99,6 +102,22 @@ def products():
     #     shirtsLen = len(shirts)
     #     return render_template ("index.html", shoppingCart=shoppingCart, shirts=shirts, shopLen=shopLen, shirtsLen=shirtsLen, total=total, totItems=totItems, display=display, session=session )
     # return render_template ( "index.html", shirts=shirts, shoppingCart=shoppingCart, shirtsLen=shirtsLen, shopLen=shopLen, total=total, totItems=totItems, display=display)
+
+
+@app.route('/search')
+def search():
+    query = request.args.get('q')
+    products = get_products(query)
+    productsLen = len(products)
+    shoppingCart = []
+    cartLen = len(shoppingCart)
+    totItems, total, display = 0, 0, 0
+    return render_template('index.html', products=products, shoppingCart=shoppingCart, productsLen=productsLen, cartLen=cartLen, total=total, totItems=totItems, display=display)
+
+
+@app.route('/about')
+def about_us():
+    return render_template('about.html')
 
 
 @app.route('/<int:id>/')

@@ -14,6 +14,14 @@
         <span class="badge rounded-pill bg-danger">{{ cartLen }}</span>
     </a>
 </div>
+<form action="/search" method="get" class="row g-3 align-items-center my-3">
+    <div class="col-10">
+        <input type="text" name="q" placeholder="Search products..." class="form-control">
+    </div>
+    <div class="col-2">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
 <div class="row">
     {% for product in products %}
     <div class="col-5 bg-light p-3 mb-3">

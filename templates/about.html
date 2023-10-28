@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="container my-5">
+    <div class="p-5 text-center bg-body-tertiary rounded-3">
+        <h2 class="my-3">About Us</h2>
+        <p class="col-lg-8 mx-auto fs-5 text-muted">
+            Welcome to FlaskStore!
+
+            At FlaskStore, we are passionate about providing you with an exceptional online shopping
+            experience. Our platform was created with the goal of making your online shopping journey convenient,
+            enjoyable, and secure. We understand the importance of trust when it comes to e-commerce, and we are
+            committed to ensuring your trust in us.
+        </p>
+        <div class="d-inline-flex gap-2 mb-5">
+            <a href="/" class="d-inline-flex align-items-center btn btn-primary btn-lg px-4 rounded-pill" type="button">
+                Shop Now
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-arrow-right" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z" />
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
